@@ -17,13 +17,15 @@ from nav_msgs.msg import Odometry
 from rebet_msgs.srv import DetectObject
 import math
 from ros_monitors_functions.laser_scan_functions import get_nearest_laser_scan_ratio
+from ros_monitors_functions.utils import register_monitor
 
-
+@register_monitor("is_too_close")
 def is_too_close(_, laser_scan_msg):
     ratio = get_nearest_laser_scan_ratio(_, laser_scan_msg)
     return ratio < 0.1
 
 
+@register_monitor("MovementPowerDraw")
 class MovementPowerDraw:
     """
     Callable monitor that maintains a rolling mean linear speed over a time window.
@@ -70,6 +72,7 @@ class MovementPowerDraw:
         return 6.25 * pow(mean_linear_velocity, 2) + 9.79 * mean_linear_velocity + 3.66
 
 
+@register_monitor("PowerBudget")
 class PowerBudget:
     """
     Callable monitor that maintains a rolling mean linear speed over a time window.
@@ -84,6 +87,7 @@ class PowerBudget:
 
     def __init__(self, num_obstacles=4, pics_per_obs=5, min_pics=1, freedom_to_det_extra=2.5,
                  avg_power_detection=59.27, pic_increment=2):
+        self.avg_power_detection = avg_power_detection
         self.power_budget = (num_obstacles * pics_per_obs) * \
             (freedom_to_det_extra * (pic_increment + min_pics)) * \
             avg_power_detection
